@@ -33,7 +33,9 @@ export function RevenueChart({
                         fontSize={10}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(v: string) => v.slice(5)}
+                        tickFormatter={(v: unknown) =>
+                            typeof v === "string" ? v.slice(5) : ""
+                        }
                         interval={4}
                     />
                     <YAxis
@@ -41,8 +43,10 @@ export function RevenueChart({
                         fontSize={10}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(v: number) =>
-                            v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)
+                        tickFormatter={(v: unknown) =>
+                            typeof v === "number" && v >= 1000
+                                ? `${Math.round(v / 1000)}k`
+                                : String(v)
                         }
                         width={40}
                     />
@@ -54,15 +58,17 @@ export function RevenueChart({
                             borderRadius: 0,
                             fontSize: 12,
                         }}
-                        labelFormatter={(label: string) =>
-                            new Date(label).toLocaleDateString("en-US", {
+                        labelFormatter={(label) =>
+                            new Date(String(label)).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
                             })
                         }
-                        formatter={(value: number, name: string) => {
-                            if (name === "revenue") return [formatPrice(value), "Revenue"];
-                            return [value, "Orders"];
+                        formatter={(value, name) => {
+                            if (name === "revenue") {
+                                return [formatPrice(Number(value)), "Revenue"];
+                            }
+                            return [String(value), "Orders"];
                         }}
                     />
                     <Area

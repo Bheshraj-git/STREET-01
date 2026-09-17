@@ -37,6 +37,8 @@ export function AddressList({ addresses }: { addresses: AddressRow[] }) {
                 editingId === addr.id ? (
                     <AddressForm
                         key={addr.id}
+                        mode="edit"
+                        id={addr.id}
                         initial={{
                             label: addr.label ?? "",
                             fullName: addr.fullName,
@@ -49,7 +51,6 @@ export function AddressList({ addresses }: { addresses: AddressRow[] }) {
                             country: addr.country,
                             isDefault: addr.isDefault,
                         }}
-                        onSubmitAction={(values) => updateAddress(addr.id, values)}
                         onCancel={() => setEditingId(null)}
                         submitLabel="Update address"
                     />
@@ -135,7 +136,7 @@ export function AddressList({ addresses }: { addresses: AddressRow[] }) {
 
             {adding ? (
                 <AddressForm
-                    onSubmitAction={createAddress}
+                    mode="create"
                     onCancel={() => setAdding(false)}
                 />
             ) : (

@@ -5,13 +5,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { addressSchema, type AddressInput } from "@/lib/schemas/account";
+import { createAddress, updateAddress } from "@/lib/actions/addresses";
 import { notify } from "@/lib/toast";
 
 export function AddressForm({
+    mode,
+    id,
     initial,
     onCancel,
-    submitLabel = "Save address",
+    submitLabel,
 }: {
+    mode: "create" | "edit";
+    id?: string;
     initial?: Partial<AddressInput>;
     onCancel: () => void;
     submitLabel?: string;
@@ -26,15 +31,31 @@ export function AddressForm({
         defaultValues: {
             country: "Nepal",
             isDefault: false,
+            label: "",
+            fullName: "",
+            phone: "",
+            line1: "",
+            line2: "",
+            city: "",
+            state: "",
+            postalCode: "",
             ...initial,
         },
     });
 
     async function submit(values: AddressInput) {
-        //const result = await onSubmitAction(values);
+        const action =
+            mode === "create"
+                ? (v: AddressInput) => createAddress(v)
+                : (v: AddressInput) => updateAddress(id!, v);
+
+        const result = await action(values);
+
         if (!result.ok) {
             if (result.field) {
-                setError(result.field as keyof AddressInput, { message: result.error });
+                setError(result.field as keyof AddressInput, {
+                    message: result.error,
+                });
             } else {
                 notify.error(result.error ?? "Could not save address.");
             }
@@ -45,6 +66,7 @@ export function AddressForm({
 
     return (
         <form
+            onSubmit={handleSubmit(submit)}
             className="flex flex-col gap-4 border border-border p-5"
             noValidate
         >
@@ -104,7 +126,9 @@ export function AddressForm({
                     <label className="text-eyebrow mb-2 block">Postal code</label>
                     <Input {...register("postalCode")} />
                     {errors.postalCode && (
-                        <p className="mt-1 text-xs text-sale">{errors.postalCode.message}</p>
+                        <p className="mt-1 text-xs text-sale">
+                            {errors.postalCode.message}
+                        </p>
                     )}
                 </div>
                 <div>
@@ -117,13 +141,17 @@ export function AddressForm({
             </div>
 
             <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" {...register("isDefault")} className="accent-accent" />
+                <input
+                    type="checkbox"
+                    {...register("isDefault")}
+                    className="accent-accent"
+                />
                 Set as default address
             </label>
 
             <div className="mt-2 flex gap-2">
                 <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving…" : submitLabel}
+                    {isSubmitting ? "Saving…" : submitLabel ?? "Save address"}
                 </Button>
                 <Button type="button" variant="ghost" onClick={onCancel}>
                     Cancel

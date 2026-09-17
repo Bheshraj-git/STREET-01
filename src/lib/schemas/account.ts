@@ -10,7 +10,7 @@ export const addressSchema = z.object({
     state: z.string().trim().min(2, "Enter state/province").max(60),
     postalCode: z.string().trim().min(3, "Enter postal code").max(12),
     country: z.string().trim().min(2).max(60),
-    isDefault: z.boolean().optional().default(false),
+    isDefault: z.boolean(),
 });
 
 export type AddressInput = z.infer<typeof addressSchema>;

@@ -71,6 +71,40 @@ export default async function ProductPage({ params }: PageProps) {
                     price: product.price,
                 }}
             />
+            {/* Structured data for search engines */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Product",
+                        name: product.name,
+                        description: product.description,
+                        image: product.images.map((i) => i.url),
+                        sku: product.sku,
+                        brand: {
+                            "@type": "Brand",
+                            name: "STREET/01",
+                        },
+                        offers: {
+                            "@type": "Offer",
+                            priceCurrency: "NPR",
+                            price: product.price,
+                            availability: product.variants.some((v) => v.stock > 0)
+                                ? "https://schema.org/InStock"
+                                : "https://schema.org/OutOfStock",
+                            url: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${product.slug}`,
+                        },
+                        ...(product.ratingCount > 0 && {
+                            aggregateRating: {
+                                "@type": "AggregateRating",
+                                ratingValue: product.ratingAverage.toFixed(1),
+                                reviewCount: product.ratingCount,
+                            },
+                        }),
+                    }),
+                }}
+            />
         </>
     );
 }

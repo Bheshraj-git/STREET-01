@@ -2,6 +2,11 @@ import { Container } from "@/components/ui/container";
 import { AccountSidebar } from "@/components/account/account-sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { requireUser } from "@/lib/auth/session";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    robots: { index: false, follow: false },
+};
 
 export default async function AccountLayout({
     children,

@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { SessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
@@ -33,7 +30,22 @@ export const metadata: Metadata = {
   },
   description:
     "Independent streetwear label. Built for everyday. Designed for everywhere.",
-  metadataBase: new URL("https://street01.example.com"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ),
+  openGraph: {
+    type: "website",
+    siteName: "STREET/01",
+    title: "STREET/01 — Wear Your Attitude",
+    description:
+      "Independent streetwear label. Built for everyday. Designed for everywhere.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "STREET/01 — Wear Your Attitude",
+    description:
+      "Independent streetwear label. Built for everyday. Designed for everywhere.",
+  },
 };
 
 export default function RootLayout({
@@ -48,12 +60,7 @@ export default function RootLayout({
       >
         <SessionProvider>
           <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-            <CartDrawer />
+            {children}
             <Toaster
               position="bottom-right"
               toastOptions={{
