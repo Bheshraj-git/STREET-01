@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   description:
     "Independent streetwear label. Built for everyday. Designed for everywhere.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
   openGraph: {
     type: "website",
