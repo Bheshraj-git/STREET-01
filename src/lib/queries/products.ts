@@ -81,3 +81,92 @@ export async function getCategories() {
         orderBy: { sortOrder: "asc" },
     });
 }
+
+export interface ShopFilterParams {
+    category?: string;
+    sort?: "newest" | "price-asc" | "price-desc" | "rating" | "featured";
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+}
+
+export async function getShopProducts(params: ShopFilterParams = {}): Promise<ProductCardData[]> {
+    const { category, sort = "newest", search, minPrice, maxPrice } = params;
+
+    const where: Record<string, unknown> = {
+        published: true,
+    };
+
+    if (category) {
+        where.category = {
+            slug: category,
+        };
+    }
+
+    if (search) {
+        where.OR = [
+            { name: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+        ];
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+        const priceFilter: { gte?: number; lte?: number } = {};
+        if (minPrice !== undefined) priceFilter.gte = minPrice;
+        if (maxPrice !== undefined) priceFilter.lte = maxPrice;
+        where.price = priceFilter;
+    }
+
+    let orderBy: Record<string, unknown> = { createdAt: "desc" };
+    if (sort === "newest") {
+        orderBy = { createdAt: "desc" };
+    } else if (sort === "price-asc") {
+        orderBy = { price: "asc" };
+    } else if (sort === "price-desc") {
+        orderBy = { price: "desc" };
+    } else if (sort === "featured") {
+        orderBy = { featured: "desc" };
+    } else if (sort === "rating") {
+        orderBy = { reviews: { _count: "desc" } };
+    }
+
+    const rows = await prisma.product.findMany({
+        where,
+        include: productCardInclude,
+        orderBy,
+    });
+
+    return rows.map(normalize);
+}
+
+export async function getCollectionsWithStats() {
+    const categories = await prisma.category.findMany({
+        where: { visible: true },
+        orderBy: { sortOrder: "asc" },
+        include: {
+            products: {
+                where: { published: true },
+                include: {
+                    images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                },
+                take: 1,
+            },
+            _count: {
+                select: {
+                    products: {
+                        where: { published: true },
+                    },
+                },
+            },
+        },
+    });
+
+    return categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description,
+        productCount: cat._count.products,
+        coverImage: cat.image || cat.products[0]?.images[0]?.url || null,
+    }));
+}

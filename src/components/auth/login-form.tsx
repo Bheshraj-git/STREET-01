@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth";
@@ -17,7 +17,7 @@ import { notify } from "@/lib/toast";
 export function LoginForm() {
     const router = useRouter();
     const params = useSearchParams();
-    const callbackUrl = params.get("callbackUrl") ?? "/account";
+    const rawCallbackUrl = params.get("callbackUrl");
 
     const cartItems = useCartStore((s) => s.items);
     const clearCart = useCartStore((s) => s.clear);
@@ -72,8 +72,18 @@ export function LoginForm() {
             // Non-fatal — continue login
         }
 
+        const session = await getSession();
+        const role = (session?.user as { role?: string } | undefined)?.role;
+
         notify.success("Welcome back");
-        router.push(callbackUrl);
+
+        // If user is ADMIN, default to /admin dashboard unless an explicit non-account URL was given
+        let destination = rawCallbackUrl;
+        if (!destination || destination === "/account") {
+            destination = role === "ADMIN" ? "/admin" : "/account";
+        }
+
+        router.push(destination);
         router.refresh();
     }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { LayoutDashboard } from "lucide-react";
 
 const LINKS = [
     { href: "/account", label: "Overview" },
@@ -12,7 +13,7 @@ const LINKS = [
     { href: "/account/profile", label: "Profile" },
 ];
 
-export function AccountSidebar() {
+export function AccountSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
     const pathname = usePathname();
 
     return (
@@ -38,6 +39,18 @@ export function AccountSidebar() {
                     </Link>
                 );
             })}
+
+            {isAdmin && (
+                <div className="mt-4 hidden border-t border-border pt-4 md:block">
+                    <Link
+                        href="/admin"
+                        className="flex items-center gap-2 whitespace-nowrap px-0 py-2 text-sm font-medium text-accent transition-colors hover:text-foreground"
+                    >
+                        <LayoutDashboard size={14} strokeWidth={1.5} />
+                        Admin Dashboard
+                    </Link>
+                </div>
+            )}
         </nav>
     );
 }

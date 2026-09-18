@@ -10,6 +10,7 @@ import {
     User,
     Sun,
     Moon,
+    LayoutDashboard,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { useTheme } from "@/components/providers/theme-provider";
@@ -26,7 +27,7 @@ const NAV_LINKS = [
     { href: "/about", label: "About" },
 ];
 
-export function Navbar() {
+export function Navbar({ isAdmin = false }: { isAdmin?: boolean }) {
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const { theme, toggle } = useTheme();
@@ -114,6 +115,18 @@ export function Navbar() {
                             )}
                         </button>
 
+                        {/* Admin shortcut badge */}
+                        {isAdmin && (
+                            <Link
+                                href="/admin"
+                                aria-label="Admin Dashboard"
+                                className="hidden h-10 items-center gap-1.5 rounded border border-accent/40 bg-accent/10 px-2.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 md:flex"
+                            >
+                                <LayoutDashboard size={13} strokeWidth={1.5} />
+                                <span>Admin</span>
+                            </Link>
+                        )}
+
                         <Link
                             href="/account"
                             aria-label="Account"
@@ -151,7 +164,7 @@ export function Navbar() {
                 </Container>
             </header>
 
-            {/* Mobile drawer — unchanged from Stage 1 */}
+            {/* Mobile drawer */}
             <div
                 className={cn(
                     "fixed inset-0 z-[60] lg:hidden",
@@ -205,6 +218,15 @@ export function Navbar() {
                         >
                             Account
                         </Link>
+                        {isAdmin && (
+                            <Link
+                                href="/admin"
+                                onClick={() => setMobileOpen(false)}
+                                className="text-eyebrow text-accent"
+                            >
+                                Admin Dashboard
+                            </Link>
+                        )}
                         <Link
                             href="/wishlist"
                             onClick={() => setMobileOpen(false)}
